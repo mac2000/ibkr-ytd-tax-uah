@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "npx lite-server"
+  },
+  "prettier": {
+    "printWidth": 400
+  }
+}

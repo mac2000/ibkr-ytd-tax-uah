@@ -3,10 +3,166 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>ibkr-ytd-tax-uah</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>ibkr-ytd-tax-uah</h1>
-    <p>hello world</p>
+    <h1>Interactive Brokers Year to Date Tax Optimizer for UAH</h1>
+    <details class="howto">
+      <summary>how it works</summary>
+      <p><img src="images/screen0.png" alt="how it works" /></p>
+      <ol>
+        <li><p>Upload your flex report(s) - note, if you have more than more account just create reports for all of them to see overall picture</p></li>
+        <li><p>At the top you will see calculated total tax - this one is approximate number you gonna need to pay for taxes</p></li>
+        <li><p>Below totals there is a table with your open positions - try to click on checkboxes to see how it will affect tax</p></li>
+        <li><p>Idea behind this - is that you may have overall feeling of how it would look like if you will decide to make some changes / allocations / movements in your portfolil</p></li>
+      </ol>
+    </details>
+    <details class="howto">
+      <summary>how to create flex report</summary>
+      <ol>
+        <li>
+          <p>Navigate to <a href="https://www.interactivebrokers.co.uk/AccountManagement/AmAuthentication?action=RM_FLEX_QUERIES" target="_blank">Performance & Reports / Flex Queries</a></p>
+          <p><img src="images/screen1.png" alt="where Performance & Reports / Flex Queries menu item is" /></p>
+        </li>
+        <li>
+          <p>Create new flex report in "Activity Flex Query" section by pressing "+" plus sign on the right hand side</p>
+          <p><img src="images/screen2.png" alt="where to create new flex report" /></p>
+        </li>
+        <li>
+          <p>Give it some name</p>
+          <p><img src="images/screen3.png" alt="naming your flex report" /></p>
+        </li>
+        <li>
+          <p><b>Cash Transactions</b></p>
+          <ol>
+            <li>
+              <p>Click on "Cash Transactions" in Sections</p>
+              <p><img src="images/screen4.png" alt="selecting Cash Transactions" /></p>
+            </li>
+            <li>
+              <p>In options - choose "Summary"</p>
+              <p><img src="images/screen5.png" alt="selecting Summary" /></p>
+            </li>
+            <li>
+              <p>In columns - choose following</p>
+              <p><img src="images/screen6.png" alt="selecting columns" /></p>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <p><b>Open Positions</b></p>
+          <ol>
+            <li>
+              <p>Click on "Open Positions" in Sections</p>
+              <p><img src="images/screen7.png" alt="selecting open positions" /></p>
+            </li>
+            <li>
+              <p>Configure "Lot" like so</p>
+              <p><img src="images/screen8.png" alt="configuring open positions" /></p>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <p><b>Trades</b></p>
+          <ol>
+            <li>
+              <p>Click on "Trades" in Sections</p>
+              <p><img src="images/screen9.png" alt="selecting trades" /></p>
+            </li>
+            <li>
+              <p>Configure "Closed Lot" like so:</p>
+              <p><img src="images/screen10.png" alt="configuring trades" /></p>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <p>Delivery configuration</p>
+          <p><img src="images/screen11.png" alt="delivery configuration" /></p>
+        </li>
+        <li>
+          <p>General configuration</p>
+          <p><img src="images/screen12.png" alt="General configuration" /></p>
+        </li>
+        <li>
+          <p>Save and run the report by clicking on arrow on a right side from created report</p>
+          <p><img src="images/screen13.png" alt="running report" /></p>
+        </li>
+        <li>
+          <p>Confirm settings and click "Run" button</p>
+          <p><img src="images/screen14.png" alt="running report" /></p>
+        </li>
+        <li>
+          <p>XML report should be downloaded shortly, next, upload it here</p>
+          <p><img src="images/screen15.png" alt="uploading xml reports" /></p>
+        </li>
+      </ol>
+    </details>
+    <p><input type="file" name="flex" id="flex" multiple accept=".xml" /></p>
+    <script src="scripts.js"></script>
+    <script>
+      document.getElementById("flex").addEventListener("change", (event) => process(event?.target?.files));
+    </script>
+    <table cellpadding="2" cellspacing="0" border="1">
+      <thead>
+        <tr>
+          <th width="34%"></th>
+          <th width="33%">income</th>
+          <th width="33%">tax</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>dividends</th>
+          <td id="dividends-income">0</td>
+          <td id="dividends-tax">0</td>
+        </tr>
+        <tr>
+          <th>trades</th>
+          <td id="trades-income">0</td>
+          <td id="trades-tax">0</td>
+        </tr>
+        <tr>
+          <th>positions</th>
+          <td id="positions-income">0</td>
+          <td id="positions-tax">0</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th>total</th>
+          <td id="total-income">0</td>
+          <td id="total-tax">0</td>
+        </tr>
+      </tfoot>
+    </table>
+    <details open>
+      <summary>Positions</summary>
+      <p>Here are your open positions, note that the "pl" column is profit/loss calculated in UAH with corresponding exchange rates if you would sell it today. Taxes from open positions are calculated at top table in "positions" row. Try to add some of open positions to see how it will affect total tax in top table.</p>
+      <table cellpadding="2" cellspacing="0" border="1">
+        <thead id="positions-thead" class="fixed"></thead>
+        <tbody id="positions-tbody"></tbody>
+      </table>
+    </details>
+    <details open>
+      <summary>Trades</summary>
+      <p>Here are trades from report, at the right hand side "pl" column is profit/loss calculated in UAH with corresponding exchange rates. Taxes from trades are calculated at top table in "trades" row</p>
+      <table cellpadding="2" cellspacing="0" border="1">
+        <thead id="trades-thead" class="fixed"></thead>
+        <tbody id="trades-tbody"></tbody>
+      </table>
+    </details>
+    <script>
+      document.getElementById("positions-tbody").addEventListener("change", (event) => {
+        if (event.target.tagName !== "INPUT") {
+          return;
+        }
+        const idx = event.target.dataset.idx;
+        positions[idx].checked = event.target.checked;
+        // renderPositions();
+        calculateTotals();
+      });
+    </script>
   </body>
 </html>
